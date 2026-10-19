@@ -28,13 +28,22 @@ export async function findSimilarResolved(text: string, excludeTicketId?: number
     take: CANDIDATE_LIMIT,
   })
 
-  const matches = rankSimilar(
+  const ranked = rankSimilar(
     text,
     candidates.map((ticket) => ({ id: ticket.id, text: `${ticket.title} ${ticket.description}` })),
-    { limit },
+    { limit: limit * 3, minScore: 0.15 },
   )
 
-  return matches.map((match) => {
+  // the same fix often shows up on many tickets, only show it once
+  const seenNotes = new Set<string>()
+  const matches = ranked.filter((match) => {
+    const note = candidates.find((candidate) => candidate.id === match.id)?.resolutionNote ?? ''
+    if (seenNotes.has(note)) return false
+    seenNotes.add(note)
+    return true
+  })
+
+  return matches.slice(0, limit).map((match) => {
     const ticket = candidates.find((candidate) => candidate.id === match.id)!
     return {
       id: ticket.id,
