@@ -3,6 +3,7 @@ import request from 'supertest'
 import { app } from '../src/app.js'
 import { prisma } from '../src/db.js'
 import type { Role } from '../src/generated/prisma/client.js'
+import { waitForAnalyses } from '../src/services/triageService.js'
 
 export const PASSWORD = 'secret123'
 
@@ -16,6 +17,7 @@ const categoryNames = [
 ]
 
 export async function resetDatabase() {
+  await waitForAnalyses()
   await prisma.$executeRawUnsafe(
     'TRUNCATE users, categories, tickets, incidents, ai_requests, ai_events RESTART IDENTITY CASCADE',
   )

@@ -136,6 +136,7 @@ export async function createTicket(user: AuthUser, input: CreateTicketInput) {
       dueAt: calculateDueAt('MEDIUM', now),
       createdAt: now,
       events: { create: { actorId: user.id, toStatus: 'OPEN', note: 'Ticket created' } },
+      analysis: { create: {} },
     },
     select: listSelect,
   })
