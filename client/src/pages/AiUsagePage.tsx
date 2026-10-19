@@ -140,7 +140,7 @@ function UsageContent({ usage }: { usage: AiUsage }) {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader title="Requests per day" />
           <div className="p-5">
@@ -190,7 +190,7 @@ function UsageContent({ usage }: { usage: AiUsage }) {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader title="Model results" />
           {usage.byModel.length === 0 ? (

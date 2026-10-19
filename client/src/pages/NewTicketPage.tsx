@@ -102,7 +102,7 @@ export function NewTicketPage() {
     <>
       <PageHeader title="New ticket" description="Tell us what is wrong and we will get on it." />
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <Card className="p-6 lg:col-span-3">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <Field label="Title" htmlFor="title" error={errors.title?.message}>

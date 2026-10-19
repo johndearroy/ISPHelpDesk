@@ -135,7 +135,7 @@ export function DashboardPage() {
         </>
       )}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-5">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader
             title={isStaff ? 'Latest tickets' : 'Your recent tickets'}
