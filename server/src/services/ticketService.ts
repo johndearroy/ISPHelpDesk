@@ -114,7 +114,7 @@ export async function getTicket(user: AuthUser, id: number) {
               reviewedBy: { select: { id: true, name: true } },
             },
           }
-        : false,
+        : { select: { status: true } },
     },
   })
   if (!ticket) {

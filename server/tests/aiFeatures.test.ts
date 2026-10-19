@@ -61,7 +61,7 @@ describe('ticket triage', () => {
 
     await client.get(`/api/tickets/${ticket.id}/analysis`).expect(403)
     const detail = await client.get(`/api/tickets/${ticket.id}`).expect(200)
-    expect(detail.body.analysis).toBeUndefined()
+    expect(detail.body.analysis).toEqual({ status: 'FALLBACK' })
   })
 
   it('records accepted and overridden suggestions', async () => {
