@@ -16,8 +16,8 @@ describe('auth', () => {
   it('registers a customer and sets the auth cookie', async () => {
     const res = await request(app).post('/api/auth/register').send(validUser).expect(201)
 
-    expect(res.body.user).toMatchObject({ email: 'karim@example.com', role: 'CUSTOMER' })
-    expect(res.body.user.passwordHash).toBeUndefined()
+    expect(res.body).toMatchObject({ email: 'karim@example.com', role: 'CUSTOMER' })
+    expect(res.body.passwordHash).toBeUndefined()
     expect(res.headers['set-cookie'][0]).toMatch(/^token=.+HttpOnly/)
   })
 
@@ -38,7 +38,7 @@ describe('auth', () => {
       .send({ ...validUser, role: 'ADMIN' })
       .expect(201)
 
-    expect(res.body.user.role).toBe('CUSTOMER')
+    expect(res.body.role).toBe('CUSTOMER')
   })
 
   it('rejects a duplicate email', async () => {
@@ -72,7 +72,7 @@ describe('auth', () => {
     const agent = await loginAs(user)
 
     const res = await agent.get('/api/auth/me').expect(200)
-    expect(res.body.user).toMatchObject({ id: user.id, role: 'AGENT' })
+    expect(res.body).toMatchObject({ id: user.id, role: 'AGENT' })
 
     await agent.post('/api/auth/logout').expect(204)
     await agent.get('/api/auth/me').expect(401)

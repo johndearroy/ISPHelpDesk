@@ -5,13 +5,13 @@ import * as authService from '../services/authService.js'
 export async function register(req: Request, res: Response) {
   const user = await authService.register(req.body)
   setAuthCookie(res, signToken(user.id))
-  res.status(201).json({ user })
+  res.status(201).json(user)
 }
 
 export async function login(req: Request, res: Response) {
   const user = await authService.login(req.body)
   setAuthCookie(res, signToken(user.id))
-  res.json({ user })
+  res.json(user)
 }
 
 export function logout(_req: Request, res: Response) {
@@ -20,5 +20,5 @@ export function logout(_req: Request, res: Response) {
 }
 
 export function me(req: Request, res: Response) {
-  res.json({ user: req.user })
+  res.json(req.user)
 }
