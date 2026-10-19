@@ -1,6 +1,7 @@
 import { prisma } from '../db.js'
 import type { AuthUser } from '../lib/auth.js'
 import { ACTIVE_STATUSES } from '../lib/ticketRules.js'
+import { getSuggestions } from './incidentService.js'
 import { visibleTo } from './ticketService.js'
 
 export async function getStats(user: AuthUser) {
@@ -26,7 +27,12 @@ export async function getStats(user: AuthUser) {
   ])
 
   let aiAcceptanceRate: number | null = null
+  let activeIncidents: number | null = null
+  let outageSuggestions: number | null = null
   if (user.role !== 'CUSTOMER') {
+    activeIncidents = await prisma.incident.count({ where: { status: 'OPEN' } })
+    outageSuggestions = (await getSuggestions()).length
+
     const reviewed = await prisma.ticketAnalysis.findMany({
       where: { reviewedAt: { not: null } },
       select: { categoryId: true, priority: true, finalCategoryId: true, finalPriority: true },
@@ -65,5 +71,7 @@ export async function getStats(user: AuthUser) {
       .map((row) => ({ name: row.area!, count: row._count }))
       .sort((a, b) => b.count - a.count),
     aiAcceptanceRate,
+    activeIncidents,
+    outageSuggestions,
   }
 }
