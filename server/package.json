@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && cp -r src/ai/reports dist/ai/",
     "start": "node --env-file-if-exists=.env dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -16,7 +16,8 @@
     "postinstall": "prisma generate",
     "seed:demo": "tsx --env-file=.env scripts/seedDemo.ts",
     "demo:outage": "tsx --env-file=.env scripts/demoOutage.ts",
-    "demo:clear": "tsx --env-file=.env scripts/demoClear.ts"
+    "demo:clear": "tsx --env-file=.env scripts/demoClear.ts",
+    "ai:eval": "tsx --env-file=.env src/ai/eval/runEval.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

@@ -17,7 +17,8 @@
     "seed": "npm run seed -w server",
     "seed:demo": "npm run seed:demo -w server",
     "demo:outage": "npm run demo:outage -w server --",
-    "demo:clear": "npm run demo:clear -w server --"
+    "demo:clear": "npm run demo:clear -w server --",
+    "ai:eval": "npm run ai:eval -w server --"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
