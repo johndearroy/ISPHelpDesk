@@ -5,6 +5,7 @@ import helmet from 'helmet'
 import { config } from './config.js'
 import { prisma } from './db.js'
 import { errorHandler, notFound } from './middleware/errorHandler.js'
+import { authRouter } from './routes/auth.js'
 
 export const app = express()
 
@@ -20,6 +21,8 @@ app.get('/api/health', async (_req, res) => {
   await prisma.$queryRaw`SELECT 1`
   res.json({ status: 'ok' })
 })
+
+app.use('/api/auth', authRouter)
 
 app.use(notFound)
 app.use(errorHandler)

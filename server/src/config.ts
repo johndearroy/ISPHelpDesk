@@ -6,7 +6,7 @@ const envSchema = z.object({
   CLIENT_ORIGIN: z.url().default('http://localhost:5173'),
   DATABASE_URL: z.string().min(1),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET should be at least 16 characters'),
-  JWT_EXPIRES_IN: z.string().default('7d'),
+  JWT_EXPIRES_DAYS: z.coerce.number().int().positive().default(7),
   OPENROUTER_API_KEY: z.string().default(''),
   OPENROUTER_BASE_URL: z.url().default('https://openrouter.ai/api/v1'),
   OPENROUTER_MODELS: z
