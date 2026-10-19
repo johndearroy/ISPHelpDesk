@@ -25,6 +25,20 @@ export async function getStats(user: AuthUser) {
     prisma.category.findMany({ select: { id: true, name: true } }),
   ])
 
+  let aiAcceptanceRate: number | null = null
+  if (user.role !== 'CUSTOMER') {
+    const reviewed = await prisma.ticketAnalysis.findMany({
+      where: { reviewedAt: { not: null } },
+      select: { categoryId: true, priority: true, finalCategoryId: true, finalPriority: true },
+    })
+    const accepted = reviewed.filter(
+      (analysis) =>
+        analysis.categoryId === analysis.finalCategoryId &&
+        analysis.priority === analysis.finalPriority,
+    ).length
+    aiAcceptanceRate = reviewed.length ? Math.round((accepted / reviewed.length) * 1000) / 10 : null
+  }
+
   const statusCounts = { OPEN: 0, IN_PROGRESS: 0, RESOLVED: 0, CLOSED: 0 }
   for (const row of byStatus) statusCounts[row.status] = row._count
 
@@ -50,5 +64,6 @@ export async function getStats(user: AuthUser) {
     byArea: byArea
       .map((row) => ({ name: row.area!, count: row._count }))
       .sort((a, b) => b.count - a.count),
+    aiAcceptanceRate,
   }
 }
