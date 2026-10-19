@@ -1,0 +1,191 @@
+{
+  "generatedAt": "2026-10-19T01:22:43.231Z",
+  "datasetSize": 147,
+  "results": [
+    {
+      "name": "Majority baseline",
+      "total": 147,
+      "failed": 0,
+      "validRate": 1,
+      "category": {
+        "accuracy": 0.224,
+        "macroF1": 0.061,
+        "perClass": [
+          {
+            "label": "Connectivity",
+            "precision": 0.224,
+            "recall": 1,
+            "f1": 0.367,
+            "support": 33
+          },
+          {
+            "label": "Billing",
+            "precision": 0,
+            "recall": 0,
+            "f1": 0,
+            "support": 24
+          },
+          {
+            "label": "Hardware",
+            "precision": 0,
+            "recall": 0,
+            "f1": 0,
+            "support": 24
+          },
+          {
+            "label": "Account & Login",
+            "precision": 0,
+            "recall": 0,
+            "f1": 0,
+            "support": 21
+          },
+          {
+            "label": "New Connection",
+            "precision": 0,
+            "recall": 0,
+            "f1": 0,
+            "support": 22
+          },
+          {
+            "label": "General Inquiry",
+            "precision": 0,
+            "recall": 0,
+            "f1": 0,
+            "support": 23
+          }
+        ],
+        "confusion": {
+          "labels": [
+            "Connectivity",
+            "Billing",
+            "Hardware",
+            "Account & Login",
+            "New Connection",
+            "General Inquiry"
+          ],
+          "matrix": [
+            [33, 0, 0, 0, 0, 0],
+            [24, 0, 0, 0, 0, 0],
+            [24, 0, 0, 0, 0, 0],
+            [21, 0, 0, 0, 0, 0],
+            [22, 0, 0, 0, 0, 0],
+            [23, 0, 0, 0, 0, 0]
+          ]
+        },
+        "byLanguage": {
+          "ENGLISH": 0.224,
+          "BANGLISH": 0.225,
+          "BANGLA": 0.227
+        }
+      },
+      "priority": {
+        "accuracy": 0.435,
+        "underTriageRate": 1
+      },
+      "language": {
+        "accuracy": 0.578
+      },
+      "latencyMs": {
+        "average": 0,
+        "p95": 0
+      }
+    },
+    {
+      "name": "Local keyword fallback",
+      "total": 147,
+      "failed": 0,
+      "validRate": 1,
+      "category": {
+        "accuracy": 0.81,
+        "macroF1": 0.814,
+        "perClass": [
+          {
+            "label": "Connectivity",
+            "precision": 0.659,
+            "recall": 0.879,
+            "f1": 0.753,
+            "support": 33
+          },
+          {
+            "label": "Billing",
+            "precision": 0.821,
+            "recall": 0.958,
+            "f1": 0.885,
+            "support": 24
+          },
+          {
+            "label": "Hardware",
+            "precision": 1,
+            "recall": 0.833,
+            "f1": 0.909,
+            "support": 24
+          },
+          {
+            "label": "Account & Login",
+            "precision": 0.941,
+            "recall": 0.762,
+            "f1": 0.842,
+            "support": 21
+          },
+          {
+            "label": "New Connection",
+            "precision": 0.8,
+            "recall": 0.727,
+            "f1": 0.762,
+            "support": 22
+          },
+          {
+            "label": "General Inquiry",
+            "precision": 0.833,
+            "recall": 0.652,
+            "f1": 0.732,
+            "support": 23
+          }
+        ],
+        "confusion": {
+          "labels": [
+            "Connectivity",
+            "Billing",
+            "Hardware",
+            "Account & Login",
+            "New Connection",
+            "General Inquiry"
+          ],
+          "matrix": [
+            [29, 1, 0, 0, 1, 2],
+            [0, 23, 0, 0, 1, 0],
+            [3, 1, 20, 0, 0, 0],
+            [3, 0, 0, 16, 1, 1],
+            [6, 0, 0, 0, 16, 0],
+            [3, 3, 0, 1, 1, 15]
+          ]
+        },
+        "byLanguage": {
+          "ENGLISH": 0.776,
+          "BANGLISH": 0.875,
+          "BANGLA": 0.818
+        }
+      },
+      "priority": {
+        "accuracy": 0.395,
+        "underTriageRate": 0.538
+      },
+      "language": {
+        "accuracy": 0.959
+      },
+      "latencyMs": {
+        "average": 0,
+        "p95": 1
+      }
+    }
+  ],
+  "outage": {
+    "scenarios": 40,
+    "truePositive": 18,
+    "falsePositive": 0,
+    "falseNegative": 2,
+    "trueNegative": 20,
+    "precision": 1,
+    "recall": 0.9
+  }
+}
