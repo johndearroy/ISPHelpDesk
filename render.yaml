@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: helpdesk-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build -w server && npm run db:deploy -w server && npm run seed -w server
+    startCommand: npm run start -w server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODELS
+        sync: false
