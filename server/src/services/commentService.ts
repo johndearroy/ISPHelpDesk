@@ -1,5 +1,6 @@
 import { prisma } from '../db.js'
 import type { AuthUser } from '../lib/auth.js'
+import { editRatio } from '../lib/editRatio.js'
 import { HttpError } from '../lib/httpError.js'
 import type { CommentInput } from '../schemas/ticket.js'
 import { findVisibleTicket } from './ticketService.js'
@@ -21,8 +22,30 @@ export async function addComment(user: AuthUser, ticketId: number, input: Commen
     throw new HttpError(409, 'Closed tickets cannot receive new comments')
   }
 
-  return prisma.comment.create({
-    data: { ticketId, authorId: user.id, body: input.body },
-    include: commentInclude,
+  if (!input.replyDraftId) {
+    return prisma.comment.create({
+      data: { ticketId, authorId: user.id, body: input.body },
+      include: commentInclude,
+    })
+  }
+
+  const draft = await prisma.replyDraft.findUnique({
+    where: { id: input.replyDraftId },
+    include: { comment: true },
   })
+  if (user.role === 'CUSTOMER' || !draft || draft.ticketId !== ticketId || draft.comment) {
+    throw new HttpError(400, 'This reply draft cannot be used for this comment')
+  }
+
+  const [comment] = await prisma.$transaction([
+    prisma.comment.create({
+      data: { ticketId, authorId: user.id, body: input.body, replyDraftId: draft.id },
+      include: commentInclude,
+    }),
+    prisma.replyDraft.update({
+      where: { id: draft.id },
+      data: { sentBody: input.body, editRatio: editRatio(draft.body, input.body) },
+    }),
+  ])
+  return comment
 }
