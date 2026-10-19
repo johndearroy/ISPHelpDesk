@@ -13,7 +13,10 @@
     "db:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "seed": "tsx --env-file=.env scripts/seed.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed:demo": "tsx --env-file=.env scripts/seedDemo.ts",
+    "demo:outage": "tsx --env-file=.env scripts/demoOutage.ts",
+    "demo:clear": "tsx --env-file=.env scripts/demoClear.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

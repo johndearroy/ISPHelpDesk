@@ -12,7 +12,12 @@
     "test": "npm run test -w server",
     "lint": "eslint .",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w client",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "db:migrate": "npm run db:migrate -w server",
+    "seed": "npm run seed -w server",
+    "seed:demo": "npm run seed:demo -w server",
+    "demo:outage": "npm run demo:outage -w server --",
+    "demo:clear": "npm run demo:clear -w server --"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
