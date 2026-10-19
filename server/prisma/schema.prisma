@@ -1,0 +1,300 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  AGENT
+  ADMIN
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum AnalysisStatus {
+  PENDING
+  DONE
+  FALLBACK
+  FAILED
+}
+
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+  FRUSTRATED
+}
+
+enum Language {
+  ENGLISH
+  BANGLISH
+  BANGLA
+}
+
+enum IncidentStatus {
+  OPEN
+  RESOLVED
+}
+
+enum AiFeature {
+  TRIAGE
+  REPLY_DRAFT
+  SUMMARY
+  INCIDENT
+}
+
+enum AiRequestStatus {
+  SUCCESS
+  FAILED
+  FALLBACK
+}
+
+enum AiEventType {
+  DEFLECTED
+  DUPLICATE_WARNED
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(CUSTOMER)
+  area         String?
+  isDemo       Boolean  @default(false) @map("is_demo")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  createdTickets    Ticket[]         @relation("TicketCreator")
+  assignedTickets   Ticket[]         @relation("TicketAssignee")
+  comments          Comment[]
+  ticketEvents      TicketEvent[]
+  reviewedAnalyses  TicketAnalysis[]
+  replyDrafts       ReplyDraft[]
+  createdIncidents  Incident[]       @relation("IncidentCreator")
+  resolvedIncidents Incident[]       @relation("IncidentResolver")
+  aiRequests        AiRequest[]
+  aiEvents          AiEvent[]
+
+  @@map("users")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tickets            Ticket[]
+  suggestedAnalyses  TicketAnalysis[] @relation("SuggestedCategory")
+  finalizedAnalyses  TicketAnalysis[] @relation("FinalCategory")
+
+  @@map("categories")
+}
+
+model Ticket {
+  id             Int          @id @default(autoincrement())
+  title          String
+  description    String
+  status         TicketStatus @default(OPEN)
+  priority       Priority     @default(MEDIUM)
+  area           String?
+  categoryId     Int?         @map("category_id")
+  createdById    Int          @map("created_by_id")
+  assignedToId   Int?         @map("assigned_to_id")
+  incidentId     Int?         @map("incident_id")
+  dueAt          DateTime     @map("due_at")
+  resolvedAt     DateTime?    @map("resolved_at")
+  resolutionNote String?      @map("resolution_note")
+  isDemo         Boolean      @default(false) @map("is_demo")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  category    Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdBy   User           @relation("TicketCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  assignedTo  User?          @relation("TicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  incident    Incident?      @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  comments    Comment[]
+  events      TicketEvent[]
+  analysis    TicketAnalysis?
+  replyDrafts ReplyDraft[]
+  summary     TicketSummary?
+  aiEvents    AiEvent[]
+
+  @@index([status])
+  @@index([createdById])
+  @@index([assignedToId])
+  @@index([area, createdAt])
+  @@map("tickets")
+}
+
+model Comment {
+  id           Int      @id @default(autoincrement())
+  ticketId     Int      @map("ticket_id")
+  authorId     Int      @map("author_id")
+  body         String
+  replyDraftId Int?     @unique @map("reply_draft_id")
+  isDemo       Boolean  @default(false) @map("is_demo")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  ticket     Ticket      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author     User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyDraft ReplyDraft? @relation(fields: [replyDraftId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@map("comments")
+}
+
+model TicketEvent {
+  id         Int           @id @default(autoincrement())
+  ticketId   Int           @map("ticket_id")
+  actorId    Int?          @map("actor_id")
+  fromStatus TicketStatus? @map("from_status")
+  toStatus   TicketStatus  @map("to_status")
+  note       String?
+  isDemo     Boolean       @default(false) @map("is_demo")
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actor  User?  @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@map("ticket_events")
+}
+
+model TicketAnalysis {
+  id                 Int            @id @default(autoincrement())
+  ticketId           Int            @unique @map("ticket_id")
+  status             AnalysisStatus @default(PENDING)
+  categoryId         Int?           @map("category_id")
+  priority           Priority?
+  sentiment          Sentiment?
+  language           Language?
+  summary            String?
+  reason             String?
+  ruleRaisedPriority Boolean        @default(false) @map("rule_raised_priority")
+  model              String?
+  finalCategoryId    Int?           @map("final_category_id")
+  finalPriority      Priority?      @map("final_priority")
+  reviewedById       Int?           @map("reviewed_by_id")
+  reviewedAt         DateTime?      @map("reviewed_at")
+  isDemo             Boolean        @default(false) @map("is_demo")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  ticket        Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  category      Category? @relation("SuggestedCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+  finalCategory Category? @relation("FinalCategory", fields: [finalCategoryId], references: [id], onDelete: SetNull)
+  reviewedBy    User?     @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("ticket_analyses")
+}
+
+model ReplyDraft {
+  id            Int      @id @default(autoincrement())
+  ticketId      Int      @map("ticket_id")
+  requestedById Int      @map("requested_by_id")
+  body          String
+  model         String?
+  rating        Int?
+  sentBody      String?  @map("sent_body")
+  editRatio     Float?   @map("edit_ratio")
+  isDemo        Boolean  @default(false) @map("is_demo")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  requestedBy User     @relation(fields: [requestedById], references: [id], onDelete: Cascade)
+  comment     Comment?
+
+  @@index([ticketId])
+  @@map("reply_drafts")
+}
+
+model TicketSummary {
+  id           Int      @id @default(autoincrement())
+  ticketId     Int      @unique @map("ticket_id")
+  body         String
+  commentCount Int      @map("comment_count")
+  model        String?
+  isDemo       Boolean  @default(false) @map("is_demo")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_summaries")
+}
+
+model Incident {
+  id             Int            @id @default(autoincrement())
+  title          String
+  area           String
+  summary        String?
+  status         IncidentStatus @default(OPEN)
+  createdById    Int            @map("created_by_id")
+  resolvedById   Int?           @map("resolved_by_id")
+  resolvedAt     DateTime?      @map("resolved_at")
+  resolutionNote String?        @map("resolution_note")
+  isDemo         Boolean        @default(false) @map("is_demo")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  createdBy  User     @relation("IncidentCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  resolvedBy User?    @relation("IncidentResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  tickets    Ticket[]
+
+  @@index([status])
+  @@map("incidents")
+}
+
+model AiRequest {
+  id               Int             @id @default(autoincrement())
+  feature          AiFeature
+  model            String?
+  status           AiRequestStatus
+  errorCode        String?         @map("error_code")
+  latencyMs        Int             @map("latency_ms")
+  promptTokens     Int?            @map("prompt_tokens")
+  completionTokens Int?            @map("completion_tokens")
+  userId           Int?            @map("user_id")
+  createdAt        DateTime        @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@map("ai_requests")
+}
+
+model AiEvent {
+  id              Int         @id @default(autoincrement())
+  type            AiEventType
+  userId          Int         @map("user_id")
+  matchedTicketId Int?        @map("matched_ticket_id")
+  isDemo          Boolean     @default(false) @map("is_demo")
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchedTicket Ticket? @relation(fields: [matchedTicketId], references: [id], onDelete: SetNull)
+
+  @@index([type, createdAt])
+  @@map("ai_events")
+}
