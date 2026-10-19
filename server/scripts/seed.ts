@@ -1,15 +1,7 @@
 import { prisma } from '../src/db.js'
+import { DEFAULT_CATEGORIES } from '../src/lib/categories.js'
 
-const categories = [
-  { name: 'Connectivity', description: 'No internet, slow speed or frequent disconnects' },
-  { name: 'Billing', description: 'Bills, payments, refunds and package charges' },
-  { name: 'Hardware', description: 'Router, ONU, cables and other equipment' },
-  { name: 'Account & Login', description: 'Customer portal access, password and account details' },
-  { name: 'New Connection', description: 'New line requests, house shifting and package changes' },
-  { name: 'General Inquiry', description: 'Questions that do not fit any other category' },
-]
-
-for (const category of categories) {
+for (const category of DEFAULT_CATEGORIES) {
   await prisma.category.upsert({
     where: { name: category.name },
     update: { description: category.description },
@@ -17,5 +9,5 @@ for (const category of categories) {
   })
 }
 
-console.info(`Seeded ${categories.length} categories`)
+console.info(`Seeded ${DEFAULT_CATEGORIES.length} categories`)
 await prisma.$disconnect()
