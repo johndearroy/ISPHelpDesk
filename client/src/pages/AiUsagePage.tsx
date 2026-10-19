@@ -2,13 +2,14 @@ import { useQuery } from '@tanstack/react-query'
 import { Activity, Gauge, LifeBuoy, ShieldAlert, Sparkles, Zap } from 'lucide-react'
 import { useState } from 'react'
 import { aiApi } from '../api/ai'
-import type { AiUsage } from '../api/types'
+import type { AiUsage, EvaluationReport } from '../api/types'
 import { Badge } from '../components/Badge'
 import { Card, CardHeader } from '../components/Card'
 import { EmptyState, ErrorState, Skeleton } from '../components/Feedback'
 import { Select } from '../components/Field'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
+import { formatDate } from '../lib/format'
 
 const REASON_LABELS: Record<string, string> = {
   no_api_key: 'No API key configured',
@@ -50,6 +51,67 @@ function DailyChart({ daily }: { daily: AiUsage['daily'] }) {
         <span>{daily.at(-1)?.date.slice(5)}</span>
       </div>
     </div>
+  )
+}
+
+const pct = (value: number) => `${Math.round(value * 1000) / 10}%`
+
+function EvaluationCard({ report }: { report: EvaluationReport }) {
+  return (
+    <Card>
+      <CardHeader
+        title="Offline evaluation"
+        action={
+          <span className="text-xs text-slate-500">
+            {report.datasetSize} labeled tickets · {formatDate(report.generatedAt)}
+          </span>
+        }
+      />
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="text-xs text-slate-500 uppercase">
+            <tr>
+              <th className="px-5 py-2 font-medium">Approach</th>
+              <th className="px-5 py-2 font-medium">Category</th>
+              <th className="px-5 py-2 font-medium">Macro F1</th>
+              <th className="px-5 py-2 font-medium">Priority</th>
+              <th
+                className="px-5 py-2 font-medium"
+                title="Urgent or high tickets predicted as medium or low"
+              >
+                Under-triage
+              </th>
+              <th className="px-5 py-2 font-medium">Valid answers</th>
+              <th className="px-5 py-2 font-medium">English / Banglish / Bangla</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            {report.results.map((result) => (
+              <tr key={result.name}>
+                <td className="max-w-56 truncate px-5 py-2.5 font-medium" title={result.name}>
+                  {result.name}
+                </td>
+                <td className="px-5 py-2.5">{pct(result.category.accuracy)}</td>
+                <td className="px-5 py-2.5">{pct(result.category.macroF1)}</td>
+                <td className="px-5 py-2.5">{pct(result.priority.accuracy)}</td>
+                <td className="px-5 py-2.5">{pct(result.priority.underTriageRate)}</td>
+                <td className="px-5 py-2.5">{pct(result.validRate)}</td>
+                <td className="px-5 py-2.5 whitespace-nowrap text-slate-500">
+                  {['ENGLISH', 'BANGLISH', 'BANGLA']
+                    .map((language) => pct(result.category.byLanguage[language] ?? 0))
+                    .join(' / ')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500 dark:border-slate-800">
+        Outage detection on {report.outage.scenarios} simulated bursts: precision{' '}
+        {pct(report.outage.precision)}, recall {pct(report.outage.recall)}. Run{' '}
+        <code>npm run ai:eval</code> to refresh.
+      </p>
+    </Card>
   )
 }
 
@@ -297,6 +359,7 @@ function UsageContent({ usage }: { usage: AiUsage }) {
           )}
         </Card>
       </div>
+      {usage.evaluation && <EvaluationCard report={usage.evaluation} />}
     </div>
   )
 }

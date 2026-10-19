@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import { aiChain, aiConfigured } from '../ai/index.js'
 import { config } from '../config.js'
 import { prisma } from '../db.js'
@@ -12,10 +13,20 @@ function rate(part: number, total: number) {
   return total ? Math.round((part / total) * 1000) / 10 : null
 }
 
+// written by npm run ai:eval, shown on the usage page next to the live numbers
+async function readEvaluation() {
+  try {
+    const report = await readFile(new URL('../ai/reports/latest.json', import.meta.url), 'utf8')
+    return JSON.parse(report)
+  } catch {
+    return null
+  }
+}
+
 export async function getAiUsage(days: number) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
-  const [requests, analyses, drafts, events] = await Promise.all([
+  const [requests, analyses, drafts, events, evaluation] = await Promise.all([
     prisma.aiRequest.findMany({
       where: { createdAt: { gte: since } },
       select: {
@@ -44,6 +55,7 @@ export async function getAiUsage(days: number) {
       select: { rating: true, editRatio: true, sentBody: true },
     }),
     prisma.aiEvent.groupBy({ by: ['type'], where: { createdAt: { gte: since } }, _count: true }),
+    readEvaluation(),
   ])
 
   const byModel = new Map<
@@ -148,5 +160,6 @@ export async function getAiUsage(days: number) {
     },
     deflections: eventCount('DEFLECTED'),
     duplicateWarnings: eventCount('DUPLICATE_WARNED'),
+    evaluation,
   }
 }

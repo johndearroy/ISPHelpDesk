@@ -180,6 +180,20 @@ export type OutageSuggestion = {
   tickets: { id: number; title: string; createdAt: string }[]
 }
 
+export type EvaluationReport = {
+  generatedAt: string
+  datasetSize: number
+  results: {
+    name: string
+    failed: number
+    validRate: number
+    category: { accuracy: number; macroF1: number; byLanguage: Record<string, number> }
+    priority: { accuracy: number; underTriageRate: number }
+    latencyMs: { average: number; p95: number | null }
+  }[]
+  outage: { scenarios: number; precision: number; recall: number }
+}
+
 export type AiUsage = {
   days: number
   configured: boolean
@@ -214,4 +228,5 @@ export type AiUsage = {
   }
   deflections: number
   duplicateWarnings: number
+  evaluation: EvaluationReport | null
 }
