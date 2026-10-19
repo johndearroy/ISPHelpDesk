@@ -34,6 +34,7 @@ function DraftRating({
         return (
           <button
             key={value}
+            type="button"
             onClick={() => rate.mutate(value)}
             disabled={rate.isPending}
             className={clsx(
