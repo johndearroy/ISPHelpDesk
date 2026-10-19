@@ -1,6 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { authApi } from '../api/auth'
 import { ApiError } from '../api/client'
+import type { User } from '../api/types'
 
 export function useMe() {
   return useQuery({
@@ -26,14 +27,17 @@ export function useCurrentUser() {
   return data
 }
 
+// drops cached data of the previous user but keeps the 'me' query observed by the layouts
+function resetSession(queryClient: QueryClient, user: User | null) {
+  queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== 'me' })
+  queryClient.setQueryData(['me'], user)
+}
+
 export function useLogin() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: authApi.login,
-    onSuccess: (user) => {
-      queryClient.clear()
-      queryClient.setQueryData(['me'], user)
-    },
+    onSuccess: (user) => resetSession(queryClient, user),
   })
 }
 
@@ -41,10 +45,7 @@ export function useRegister() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: authApi.register,
-    onSuccess: (user) => {
-      queryClient.clear()
-      queryClient.setQueryData(['me'], user)
-    },
+    onSuccess: (user) => resetSession(queryClient, user),
   })
 }
 
@@ -52,9 +53,6 @@ export function useLogout() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: authApi.logout,
-    onSuccess: () => {
-      queryClient.clear()
-      queryClient.setQueryData(['me'], null)
-    },
+    onSuccess: () => resetSession(queryClient, null),
   })
 }
