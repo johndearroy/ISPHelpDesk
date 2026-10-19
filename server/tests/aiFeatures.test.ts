@@ -1,6 +1,5 @@
-import request from 'supertest'
+import type request from 'supertest'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { app } from '../src/app.js'
 import { prisma } from '../src/db.js'
 import { waitForAnalyses } from '../src/services/triageService.js'
 import { categoryId, createUser, loginAs, resetDatabase } from './helpers.js'
